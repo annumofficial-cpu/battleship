@@ -1,16 +1,19 @@
 // Connects the game rules to the page (drawing boards, handling clicks).
 import { BOARD_SIZE, RESULT, placeShipsRandomly, fireAt, isSunk } from './game.js';
+import { createAI, chooseShot, recordShot } from './ai.js';
 
 const ROW_LABELS = 'ABCDEFGHIJ'.slice(0, BOARD_SIZE).split('');
 
 const playerBoardEl = document.getElementById('player-board');
 const enemyBoardEl = document.getElementById('enemy-board');
 const enemyFleetEl = document.getElementById('enemy-fleet');
+const playerFleetEl = document.getElementById('player-fleet');
 const messageEl = document.getElementById('message');
 const newGameButton = document.getElementById('new-game');
 
 let playerBoard;
 let enemyBoard;
+let computer;
 let gameOver = false;
 
 function squareName(row, col) {
@@ -89,9 +92,9 @@ function refreshGrid(boardEl, board, showShips) {
   }
 }
 
-function refreshEnemyFleet() {
-  enemyFleetEl.replaceChildren(
-    ...enemyBoard.ships.map((ship) => {
+function refreshFleet(listEl, board) {
+  listEl.replaceChildren(
+    ...board.ships.map((ship) => {
       const item = document.createElement('li');
       const sunk = isSunk(ship);
       item.className = sunk ? 'sunk' : '';
@@ -101,45 +104,65 @@ function refreshEnemyFleet() {
   );
 }
 
+function refreshAll() {
+  refreshGrid(playerBoardEl, playerBoard, true);
+  refreshGrid(enemyBoardEl, enemyBoard, false);
+  refreshFleet(playerFleetEl, playerBoard);
+  refreshFleet(enemyFleetEl, enemyBoard);
+  enemyBoardEl.classList.toggle('game-over', gameOver);
+}
+
+function describeShot(shooter, square, shot, owner) {
+  if (shot.result === RESULT.MISS) return `${shooter} at ${square}: miss.`;
+  const sunk = shot.sunk ? ` ${owner === 'your' ? 'It sank your' : 'You sank the'} ${shot.ship}.` : '';
+  return `${shooter} at ${square}: hit!${sunk}`;
+}
+
+function computerTurn() {
+  const [row, col] = chooseShot(computer);
+  const shot = fireAt(playerBoard, row, col);
+  recordShot(computer, row, col, shot);
+  let text = describeShot('Computer fires', squareName(row, col), shot, 'your');
+  if (shot.allSunk) {
+    gameOver = true;
+    text += ' All your ships are sunk. You lose. Press New Game to play again.';
+  }
+  return text;
+}
+
 function handleFire(row, col) {
-  const square = squareName(row, col);
   if (gameOver) {
     setMessage('The game is over. Press New Game to play again.');
     return;
   }
 
+  const square = squareName(row, col);
   const shot = fireAt(enemyBoard, row, col);
   if (shot.result === RESULT.ALREADY_FIRED) {
     setMessage(`You already fired at ${square}. Pick another square.`);
     return;
   }
 
-  if (shot.result === RESULT.MISS) {
-    setMessage(`${square}: miss.`);
-  } else if (shot.allSunk) {
+  let text = describeShot('You fire', square, shot, 'enemy');
+  if (shot.allSunk) {
     gameOver = true;
-    setMessage(`${square}: hit! You sank the ${shot.ship}. All enemy ships are sunk. You win! Press New Game to play again.`);
-  } else if (shot.sunk) {
-    setMessage(`${square}: hit! You sank the ${shot.ship}.`);
+    text += ' All enemy ships are sunk. You win! Press New Game to play again.';
   } else {
-    setMessage(`${square}: hit!`);
+    text += ' ' + computerTurn();
   }
 
-  refreshGrid(enemyBoardEl, enemyBoard, false);
-  refreshEnemyFleet();
-  enemyBoardEl.classList.toggle('game-over', gameOver);
+  setMessage(text);
+  refreshAll();
 }
 
 function newGame() {
   playerBoard = placeShipsRandomly();
   enemyBoard = placeShipsRandomly();
+  computer = createAI();
   gameOver = false;
   buildGrid(playerBoardEl);
   buildGrid(enemyBoardEl, handleFire);
-  refreshGrid(playerBoardEl, playerBoard, true);
-  refreshGrid(enemyBoardEl, enemyBoard, false);
-  refreshEnemyFleet();
-  enemyBoardEl.classList.remove('game-over');
+  refreshAll();
   setMessage('New game. Click a square on the enemy board to fire.');
 }
 
