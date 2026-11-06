@@ -4,10 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Battleship</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <main id="app"></main>
+  <header>
+    <h1>Battleship</h1>
+    <button type="button" id="new-game">New Game</button>
+  </header>
+
+  <p id="message" class="message" role="status" aria-live="polite"></p>
+
+  <main class="boards">
+    <section class="board-panel" id="player-panel" aria-labelledby="player-title">
+      <h2 id="player-title">Your fleet</h2>
+      <div class="board" id="player-board" role="grid" aria-label="Your board"></div>
+    </section>
+
+    <section class="board-panel" id="enemy-panel" aria-labelledby="enemy-title">
+      <h2 id="enemy-title">Enemy waters</h2>
+      <div class="board" id="enemy-board" role="grid" aria-label="Enemy board. Choose a square to fire at."></div>
+      <ul class="fleet" id="enemy-fleet" aria-label="Enemy ships"></ul>
+    </section>
+  </main>
+
+  <ul class="legend" aria-label="Key">
+    <li><span class="cell ship" aria-hidden="true"></span> Your ship</li>
+    <li><span class="cell hit" aria-hidden="true">✕</span> Hit</li>
+    <li><span class="cell miss" aria-hidden="true">•</span> Miss</li>
+    <li><span class="cell hit sunk" aria-hidden="true">✕</span> Sunk ship</li>
+  </ul>
+
+  <noscript>This game needs JavaScript turned on.</noscript>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

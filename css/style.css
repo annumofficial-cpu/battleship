@@ -1,1 +1,144 @@
 /* Battleship styles */
+:root {
+  --cell: min(8vw, 34px);
+  --water: #d6ecfa;
+  --water-hover: #a9d4f2;
+  --ship: #6b7c8f;
+  --hit: #c62828;
+  --sunk: #5d1010;
+  --miss-dot: #1d3a52;
+  --text: #13202c;
+  --line: #8fb3cc;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background: #f4f8fb;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0 auto;
+  padding: 16px;
+  max-width: 900px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+h1 { margin: 0; font-size: 1.6rem; }
+h2 { margin: 0 0 8px; font-size: 1.1rem; text-align: center; }
+
+#new-game {
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #1d4f7a;
+  color: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#new-game:hover { background: #163d5f; }
+
+.message {
+  min-height: 3em;
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid var(--line);
+  font-weight: 600;
+}
+
+.boards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+}
+
+.board-panel {
+  width: calc(11 * var(--cell) + 20px);
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(11, var(--cell));
+  grid-auto-rows: var(--cell);
+  gap: 2px;
+  justify-content: center;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--cell) * 0.4);
+  color: #4a6075;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cell);
+  height: var(--cell);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--water);
+  font: inherit;
+  font-size: calc(var(--cell) * 0.6);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+}
+
+button.cell { cursor: crosshair; touch-action: manipulation; }
+button.cell:not(.fired):hover { background: var(--water-hover); }
+button.cell:focus-visible { outline: 3px solid #f2a900; outline-offset: 1px; }
+button.cell.fired { cursor: not-allowed; }
+.board.game-over button.cell { cursor: default; }
+
+.cell.ship { background: var(--ship); border-color: #4b5a6a; }
+.cell.miss { color: var(--miss-dot); }
+.cell.hit { background: var(--hit); border-color: #8e1b1b; color: #fff; }
+.cell.sunk { background: var(--sunk); border-color: #000; }
+
+.fleet {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+.fleet .sunk { text-decoration: line-through; color: #8a4040; }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 18px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend .cell { --cell: 24px; }
+
+/* Phones: stack the boards and put the board you click on first. */
+@media (max-width: 760px) {
+  body { padding: 12px; }
+  h1 { font-size: 1.3rem; }
+  .boards { flex-direction: column; align-items: center; }
+  #enemy-panel { order: -1; }
+}
