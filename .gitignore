@@ -1,0 +1,12 @@
+# Dependencies (none today, but keep them out of git if added later)
+node_modules/
+
+# OS and editor clutter
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
