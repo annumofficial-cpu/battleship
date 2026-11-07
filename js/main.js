@@ -25,20 +25,8 @@ function squareName(row, col) {
   return `${ROW_LABELS[row]}${col + 1}`;
 }
 
-let messageVersion = 0;
-
-// The message line is a live region, so screen readers read each new message.
-// A repeated message is cleared first so that it is read out again.
 function setMessage(text) {
-  const version = ++messageVersion;
-  if (messageEl.textContent !== text) {
-    messageEl.textContent = text;
-    return;
-  }
-  messageEl.textContent = '';
-  setTimeout(() => {
-    if (version === messageVersion) messageEl.textContent = text;
-  }, 100);
+  messageEl.textContent = text;
 }
 
 function enemyCell(row, col) {
@@ -71,14 +59,12 @@ function buildGrid(boardEl, onFire) {
     const label = document.createElement('span');
     label.className = 'label';
     label.textContent = col + 1;
-    label.setAttribute('aria-hidden', 'true');
     boardEl.appendChild(label);
   }
   for (let row = 0; row < BOARD_SIZE; row++) {
     const label = document.createElement('span');
     label.className = 'label';
     label.textContent = ROW_LABELS[row];
-    label.setAttribute('aria-hidden', 'true');
     boardEl.appendChild(label);
     for (let col = 0; col < BOARD_SIZE; col++) {
       const cell = document.createElement(onFire ? 'button' : 'span');
@@ -94,19 +80,15 @@ function buildGrid(boardEl, onFire) {
           onFire(row, col);
         });
         cell.addEventListener('focus', () => makeCurrent(cell));
-      } else {
-        cell.setAttribute('role', 'img');
       }
       boardEl.appendChild(cell);
     }
   }
 }
 
-// Updates every square's look and spoken label from the board's current state.
+// Updates every square's look from the board's current state.
 // Elements are reused rather than rebuilt, so keyboard focus stays put.
-// Labels read like "Enemy board, B3, miss" or "Your board, F5, Cruiser, hit".
 function refreshGrid(boardEl, board, showShips) {
-  const boardName = showShips ? 'Your board' : 'Enemy board';
   for (const cell of boardEl.querySelectorAll('.cell')) {
     const row = Number(cell.dataset.row);
     const col = Number(cell.dataset.col);
@@ -115,18 +97,8 @@ function refreshGrid(boardEl, board, showShips) {
     const fired = board.shots[row][col];
 
     let symbol = '';
-    let state = showShips ? 'water' : 'not fired';
-    if (fired && ship) {
-      symbol = '✕';
-      const sunk = isSunk(ship);
-      if (showShips) state = `${ship.name}, ${sunk ? 'sunk' : 'hit'}`;
-      else state = sunk ? `hit, ${ship.name} sunk` : 'hit';
-    } else if (fired) {
-      symbol = '•';
-      state = 'miss';
-    } else if (ship && showShips) {
-      state = ship.name;
-    }
+    if (fired && ship) symbol = '✕';
+    else if (fired) symbol = '•';
 
     cell.textContent = symbol;
     cell.classList.toggle('ship', Boolean(ship && showShips));
@@ -134,7 +106,6 @@ function refreshGrid(boardEl, board, showShips) {
     cell.classList.toggle('sunk', Boolean(fired && ship && isSunk(ship)));
     cell.classList.toggle('miss', fired && !ship);
     cell.classList.toggle('fired', fired);
-    cell.setAttribute('aria-label', `${boardName}, ${squareName(row, col)}, ${state}`);
   }
 }
 

@@ -13,9 +13,9 @@
     <button type="button" id="new-game">New Game</button>
   </header>
 
-  <p id="message" class="message" role="status" aria-live="polite" aria-atomic="true"></p>
+  <p id="message" class="message"></p>
 
-  <section class="summary" id="summary" aria-labelledby="summary-title" hidden>
+  <section class="summary" id="summary" hidden>
     <h2 id="summary-title"></h2>
     <dl class="summary-stats">
       <div><dt>Shots fired</dt><dd id="stat-shots"></dd></div>
@@ -27,24 +27,24 @@
   </section>
 
   <main class="boards">
-    <section class="board-panel" id="player-panel" aria-labelledby="player-title">
+    <section class="board-panel" id="player-panel">
       <h2 id="player-title">Your fleet</h2>
-      <div class="board" id="player-board" role="group" aria-label="Your board"></div>
-      <ul class="fleet" id="player-fleet" aria-label="Your ships"></ul>
+      <div class="board" id="player-board"></div>
+      <ul class="fleet" id="player-fleet"></ul>
     </section>
 
-    <section class="board-panel" id="enemy-panel" aria-labelledby="enemy-title">
+    <section class="board-panel" id="enemy-panel">
       <h2 id="enemy-title">Enemy waters</h2>
-      <div class="board" id="enemy-board" role="group" aria-label="Enemy board" aria-describedby="keyboard-help"></div>
-      <ul class="fleet" id="enemy-fleet" aria-label="Enemy ships"></ul>
+      <div class="board" id="enemy-board"></div>
+      <ul class="fleet" id="enemy-fleet"></ul>
     </section>
   </main>
 
-  <ul class="legend" aria-label="Key">
-    <li><span class="cell ship" aria-hidden="true"></span> Your ship</li>
-    <li><span class="cell hit" aria-hidden="true">✕</span> Hit</li>
-    <li><span class="cell miss" aria-hidden="true">•</span> Miss</li>
-    <li><span class="cell hit sunk" aria-hidden="true">✕</span> Sunk ship</li>
+  <ul class="legend">
+    <li><span class="cell ship"></span> Your ship</li>
+    <li><span class="cell hit">✕</span> Hit</li>
+    <li><span class="cell miss">•</span> Miss</li>
+    <li><span class="cell hit sunk">✕</span> Sunk ship</li>
   </ul>
   <p class="hint" id="keyboard-help">No mouse? Press Tab to reach the enemy board, use the arrow keys to move, and press Enter or Space to fire.</p>
 
