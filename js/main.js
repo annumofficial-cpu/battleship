@@ -1,6 +1,7 @@
 // Connects the game rules to the page (drawing boards, handling clicks).
 import { BOARD_SIZE, RESULT, placeShipsRandomly, fireAt, isSunk } from './game.js';
 import { createAI, chooseShot, recordShot } from './ai.js';
+import { gameSummary } from './stats.js';
 
 const ROW_LABELS = 'ABCDEFGHIJ'.slice(0, BOARD_SIZE).split('');
 const ANIMATIONS = ['anim-miss', 'anim-hit', 'anim-sunk'];
@@ -11,6 +12,9 @@ const enemyFleetEl = document.getElementById('enemy-fleet');
 const playerFleetEl = document.getElementById('player-fleet');
 const messageEl = document.getElementById('message');
 const newGameButton = document.getElementById('new-game');
+const summaryEl = document.getElementById('summary');
+const playAgainButton = document.getElementById('play-again');
+const ARROW_STEPS = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
 
 let playerBoard;
 let enemyBoard;
@@ -21,8 +25,41 @@ function squareName(row, col) {
   return `${ROW_LABELS[row]}${col + 1}`;
 }
 
+let messageVersion = 0;
+
+// The message line is a live region, so screen readers read each new message.
+// A repeated message is cleared first so that it is read out again.
 function setMessage(text) {
-  messageEl.textContent = text;
+  const version = ++messageVersion;
+  if (messageEl.textContent !== text) {
+    messageEl.textContent = text;
+    return;
+  }
+  messageEl.textContent = '';
+  setTimeout(() => {
+    if (version === messageVersion) messageEl.textContent = text;
+  }, 100);
+}
+
+function enemyCell(row, col) {
+  return enemyBoardEl.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+}
+
+// Only one enemy square is in the Tab order at a time; the arrow keys move it.
+function makeCurrent(cell) {
+  for (const other of enemyBoardEl.querySelectorAll('button.cell[tabindex="0"]')) other.tabIndex = -1;
+  cell.tabIndex = 0;
+}
+
+function handleArrowKey(event) {
+  const step = ARROW_STEPS[event.key];
+  const cell = event.target.closest('button.cell');
+  if (!step || !cell) return;
+  event.preventDefault();
+  const clamp = (n) => Math.min(Math.max(n, 0), BOARD_SIZE - 1);
+  const next = enemyCell(clamp(Number(cell.dataset.row) + step[0]), clamp(Number(cell.dataset.col) + step[1]));
+  makeCurrent(next);
+  next.focus();
 }
 
 // Builds the 10x10 grid once per game, with row letters and column numbers.
@@ -51,9 +88,14 @@ function buildGrid(boardEl, onFire) {
       cell.addEventListener('animationend', () => cell.classList.remove(...ANIMATIONS));
       if (onFire) {
         cell.type = 'button';
-        cell.addEventListener('click', () => onFire(row, col));
+        cell.tabIndex = row === 0 && col === 0 ? 0 : -1;
+        cell.addEventListener('click', () => {
+          makeCurrent(cell);
+          onFire(row, col);
+        });
+        cell.addEventListener('focus', () => makeCurrent(cell));
       } else {
-        cell.setAttribute('role', 'gridcell');
+        cell.setAttribute('role', 'img');
       }
       boardEl.appendChild(cell);
     }
@@ -62,7 +104,9 @@ function buildGrid(boardEl, onFire) {
 
 // Updates every square's look and spoken label from the board's current state.
 // Elements are reused rather than rebuilt, so keyboard focus stays put.
+// Labels read like "Enemy board, B3, miss" or "Your board, F5, Cruiser, hit".
 function refreshGrid(boardEl, board, showShips) {
+  const boardName = showShips ? 'Your board' : 'Enemy board';
   for (const cell of boardEl.querySelectorAll('.cell')) {
     const row = Number(cell.dataset.row);
     const col = Number(cell.dataset.col);
@@ -71,17 +115,17 @@ function refreshGrid(boardEl, board, showShips) {
     const fired = board.shots[row][col];
 
     let symbol = '';
-    let state = 'water';
+    let state = showShips ? 'water' : 'not fired';
     if (fired && ship) {
       symbol = '✕';
-      state = isSunk(ship) ? `hit, ${ship.name} sunk` : 'hit';
+      const sunk = isSunk(ship);
+      if (showShips) state = `${ship.name}, ${sunk ? 'sunk' : 'hit'}`;
+      else state = sunk ? `hit, ${ship.name} sunk` : 'hit';
     } else if (fired) {
       symbol = '•';
       state = 'miss';
     } else if (ship && showShips) {
       state = ship.name;
-    } else if (!showShips) {
-      state = 'not fired at';
     }
 
     cell.textContent = symbol;
@@ -90,7 +134,7 @@ function refreshGrid(boardEl, board, showShips) {
     cell.classList.toggle('sunk', Boolean(fired && ship && isSunk(ship)));
     cell.classList.toggle('miss', fired && !ship);
     cell.classList.toggle('fired', fired);
-    cell.setAttribute('aria-label', `${squareName(row, col)}: ${state}`);
+    cell.setAttribute('aria-label', `${boardName}, ${squareName(row, col)}, ${state}`);
   }
 }
 
@@ -124,6 +168,21 @@ function animateShot(boardEl, row, col, shot) {
     cell.classList.remove(...ANIMATIONS);
     cell.classList.add(name);
   }
+}
+
+function showSummary() {
+  const summary = gameSummary(playerBoard, enemyBoard);
+  document.getElementById('summary-title').textContent = summary.won ? 'You win!' : 'You lose';
+  document.getElementById('stat-shots').textContent = summary.shots;
+  document.getElementById('stat-hits').textContent = summary.hits;
+  document.getElementById('stat-accuracy').textContent = `${summary.accuracy}%`;
+  document.getElementById('survivors-label').textContent = summary.won
+    ? 'Your ships still afloat:'
+    : 'Enemy ships still afloat:';
+  document.getElementById('survivors').textContent = summary.survivors.join(', ') || 'none';
+  summaryEl.classList.toggle('lost', !summary.won);
+  summaryEl.hidden = false;
+  summaryEl.scrollIntoView({ block: 'nearest' });
 }
 
 function describeShot(shooter, square, shot, owner) {
@@ -169,6 +228,7 @@ function handleFire(row, col) {
 
   setMessage(text);
   refreshAll();
+  if (gameOver) showSummary();
   animateShot(enemyBoardEl, row, col, shot);
   if (reply) animateShot(playerBoardEl, reply.row, reply.col, reply.shot);
 }
@@ -180,9 +240,16 @@ function newGame() {
   gameOver = false;
   buildGrid(playerBoardEl);
   buildGrid(enemyBoardEl, handleFire);
+  summaryEl.hidden = true;
   refreshAll();
   setMessage('New game. Click a square on the enemy board to fire.');
 }
 
 newGameButton.addEventListener('click', newGame);
+// The Play Again button disappears once pressed, so keyboard focus moves to the enemy board.
+playAgainButton.addEventListener('click', () => {
+  newGame();
+  enemyCell(0, 0).focus();
+});
+enemyBoardEl.addEventListener('keydown', handleArrowKey);
 newGame();

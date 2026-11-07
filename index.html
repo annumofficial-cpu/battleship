@@ -13,18 +13,29 @@
     <button type="button" id="new-game">New Game</button>
   </header>
 
-  <p id="message" class="message" role="status" aria-live="polite"></p>
+  <p id="message" class="message" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <section class="summary" id="summary" aria-labelledby="summary-title" hidden>
+    <h2 id="summary-title"></h2>
+    <dl class="summary-stats">
+      <div><dt>Shots fired</dt><dd id="stat-shots"></dd></div>
+      <div><dt>Hits</dt><dd id="stat-hits"></dd></div>
+      <div><dt>Accuracy</dt><dd id="stat-accuracy"></dd></div>
+    </dl>
+    <p class="survivors"><span id="survivors-label"></span> <span id="survivors"></span></p>
+    <button type="button" id="play-again">Play Again</button>
+  </section>
 
   <main class="boards">
     <section class="board-panel" id="player-panel" aria-labelledby="player-title">
       <h2 id="player-title">Your fleet</h2>
-      <div class="board" id="player-board" role="grid" aria-label="Your board"></div>
+      <div class="board" id="player-board" role="group" aria-label="Your board"></div>
       <ul class="fleet" id="player-fleet" aria-label="Your ships"></ul>
     </section>
 
     <section class="board-panel" id="enemy-panel" aria-labelledby="enemy-title">
       <h2 id="enemy-title">Enemy waters</h2>
-      <div class="board" id="enemy-board" role="grid" aria-label="Enemy board. Choose a square to fire at."></div>
+      <div class="board" id="enemy-board" role="group" aria-label="Enemy board" aria-describedby="keyboard-help"></div>
       <ul class="fleet" id="enemy-fleet" aria-label="Enemy ships"></ul>
     </section>
   </main>
@@ -35,6 +46,7 @@
     <li><span class="cell miss" aria-hidden="true">•</span> Miss</li>
     <li><span class="cell hit sunk" aria-hidden="true">✕</span> Sunk ship</li>
   </ul>
+  <p class="hint" id="keyboard-help">No mouse? Press Tab to reach the enemy board, use the arrow keys to move, and press Enter or Space to fire.</p>
 
   <noscript>This game needs JavaScript turned on.</noscript>
   <script type="module" src="js/main.js"></script>
