@@ -3,6 +3,7 @@ import { BOARD_SIZE, RESULT, placeShipsRandomly, fireAt, isSunk } from './game.j
 import { createAI, chooseShot, recordShot } from './ai.js';
 
 const ROW_LABELS = 'ABCDEFGHIJ'.slice(0, BOARD_SIZE).split('');
+const ANIMATIONS = ['anim-miss', 'anim-hit', 'anim-sunk'];
 
 const playerBoardEl = document.getElementById('player-board');
 const enemyBoardEl = document.getElementById('enemy-board');
@@ -47,6 +48,7 @@ function buildGrid(boardEl, onFire) {
       cell.className = 'cell';
       cell.dataset.row = row;
       cell.dataset.col = col;
+      cell.addEventListener('animationend', () => cell.classList.remove(...ANIMATIONS));
       if (onFire) {
         cell.type = 'button';
         cell.addEventListener('click', () => onFire(row, col));
@@ -112,6 +114,18 @@ function refreshAll() {
   enemyBoardEl.classList.toggle('game-over', gameOver);
 }
 
+// Plays a short effect on the square just fired at, or on every square of a ship
+// that just sank. The CSS switches the effects off for people who reduce motion.
+function animateShot(boardEl, row, col, shot) {
+  const name = shot.sunk ? 'anim-sunk' : shot.result === RESULT.HIT ? 'anim-hit' : 'anim-miss';
+  const squares = shot.sunk ? shot.sunkCells : [[row, col]];
+  for (const [r, c] of squares) {
+    const cell = boardEl.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+    cell.classList.remove(...ANIMATIONS);
+    cell.classList.add(name);
+  }
+}
+
 function describeShot(shooter, square, shot, owner) {
   if (shot.result === RESULT.MISS) return `${shooter} at ${square}: miss.`;
   const sunk = shot.sunk ? ` ${owner === 'your' ? 'It sank your' : 'You sank the'} ${shot.ship}.` : '';
@@ -127,7 +141,7 @@ function computerTurn() {
     gameOver = true;
     text += ' All your ships are sunk. You lose. Press New Game to play again.';
   }
-  return text;
+  return { text, row, col, shot };
 }
 
 function handleFire(row, col) {
@@ -144,15 +158,19 @@ function handleFire(row, col) {
   }
 
   let text = describeShot('You fire', square, shot, 'enemy');
+  let reply = null;
   if (shot.allSunk) {
     gameOver = true;
     text += ' All enemy ships are sunk. You win! Press New Game to play again.';
   } else {
-    text += ' ' + computerTurn();
+    reply = computerTurn();
+    text += ' ' + reply.text;
   }
 
   setMessage(text);
   refreshAll();
+  animateShot(enemyBoardEl, row, col, shot);
+  if (reply) animateShot(playerBoardEl, reply.row, reply.col, reply.shot);
 }
 
 function newGame() {

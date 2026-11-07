@@ -1,17 +1,23 @@
-/* Battleship styles */
+/* Battleship styles: deep navy "naval radar" theme */
 :root {
-  --cell: min(8vw, 34px);
-  --water: #d6ecfa;
-  --water-hover: #a9d4f2;
-  --ship: #6b7c8f;
+  --cell: min(calc((100vw - 64px) / 11), 34px);
+  --bg: #061226;
+  --panel: #0b1f3a;
+  --water: linear-gradient(160deg, #165582 0%, #0f3d63 100%);
+  --water-hover: linear-gradient(160deg, #2373aa 0%, #18547f 100%);
+  --ship: #9aabbf;
   --hit: #c62828;
-  --sunk: #5d1010;
-  --miss-dot: #1d3a52;
-  --text: #13202c;
-  --line: #8fb3cc;
+  --sunk: #4a0d0d;
+  --miss-dot: #e6f4ff;
+  --text: #e8f1fb;
+  --muted: #a9c7e0;
+  --accent: #4fd8e8;
+  --line: #2d6f99;
+  color-scheme: dark;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color: var(--text);
-  background: #f4f8fb;
+  background: var(--bg) radial-gradient(ellipse at top, #0f2f55 0%, var(--bg) 65%) no-repeat;
+  min-height: 100%;
 }
 
 * { box-sizing: border-box; }
@@ -29,29 +35,63 @@ header {
   gap: 12px;
 }
 
-h1 { margin: 0; font-size: 1.6rem; }
-h2 { margin: 0 0 8px; font-size: 1.1rem; text-align: center; }
+h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 14px rgba(79, 216, 232, 0.45);
+}
+/* A small radar dish drawn in CSS next to the title. */
+h1::before {
+  content: '';
+  flex: none;
+  width: 0.9em;
+  height: 0.9em;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background:
+    radial-gradient(circle, var(--accent) 0 12%, transparent 13%),
+    conic-gradient(from 0deg, rgba(79, 216, 232, 0.7), transparent 30%),
+    #0a2a45;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--accent);
+}
 
 #new-game {
   font: inherit;
-  font-weight: 600;
+  font-weight: 700;
   padding: 10px 18px;
   border: 0;
   border-radius: 8px;
-  background: #1d4f7a;
-  color: #fff;
+  background: var(--accent);
+  color: #04121f;
   cursor: pointer;
   touch-action: manipulation;
+  white-space: nowrap;
 }
-#new-game:hover { background: #163d5f; }
+#new-game:hover { background: #8ae8f2; }
+#new-game:focus-visible { outline: 3px solid #ffc94d; outline-offset: 2px; }
 
 .message {
   min-height: 3em;
   margin: 12px 0;
   padding: 10px 12px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--panel);
   border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
   font-weight: 600;
 }
 
@@ -62,8 +102,9 @@ h2 { margin: 0 0 8px; font-size: 1.1rem; text-align: center; }
   gap: 24px;
 }
 
+/* As wide as the grid (11 squares, 10 gaps) plus the board's padding and border. */
 .board-panel {
-  width: calc(11 * var(--cell) + 20px);
+  width: calc(11 * var(--cell) + 20px + 14px);
 }
 
 .board {
@@ -72,6 +113,14 @@ h2 { margin: 0 0 8px; font-size: 1.1rem; text-align: center; }
   grid-auto-rows: var(--cell);
   gap: 2px;
   justify-content: center;
+  padding: 6px;
+  border: 1px solid #1f5b80;
+  border-radius: 10px;
+  background:
+    repeating-radial-gradient(circle at 55% 55%, transparent 0 46px, rgba(127, 227, 240, 0.07) 46px 47px),
+    radial-gradient(circle at 55% 55%, rgba(79, 216, 232, 0.12), transparent 70%),
+    #0a2240;
+  box-shadow: inset 0 0 18px rgba(64, 200, 224, 0.15), 0 0 12px rgba(0, 0, 0, 0.4);
 }
 
 .label {
@@ -79,10 +128,12 @@ h2 { margin: 0 0 8px; font-size: 1.1rem; text-align: center; }
   align-items: center;
   justify-content: center;
   font-size: calc(var(--cell) * 0.4);
-  color: #4a6075;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 .cell {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,14 +154,48 @@ button.cell { cursor: crosshair; touch-action: manipulation; }
 @media (hover: hover) and (pointer: fine) {
   .board:not(.game-over) button.cell:not(.fired):hover { background: var(--water-hover); }
 }
-button.cell:focus-visible { outline: 3px solid #f2a900; outline-offset: 1px; }
+button.cell:focus-visible { outline: 3px solid #ffc94d; outline-offset: 1px; z-index: 2; }
 button.cell.fired { cursor: not-allowed; }
 .board.game-over button.cell { cursor: default; }
 
-.cell.ship { background: var(--ship); border-color: #4b5a6a; }
+.cell.ship { background: var(--ship); border-color: #c8d4e1; }
 .cell.miss { color: var(--miss-dot); }
-.cell.hit { background: var(--hit); border-color: #8e1b1b; color: #fff; }
-.cell.sunk { background: var(--sunk); border-color: #000; }
+.cell.hit { background: var(--hit); border-color: #ff8a80; color: #fff; }
+.cell.sunk { background: var(--sunk); border-color: #ff6b6b; }
+
+/* Short effects on the square just fired at (added by main.js). */
+.cell.anim-miss::after {
+  content: '';
+  position: absolute;
+  inset: 20%;
+  border: 2px solid #9fe9ff;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  animation: ripple 450ms ease-out;
+}
+.cell.anim-hit { z-index: 1; animation: pulse 400ms ease-out; }
+.cell.anim-sunk { z-index: 1; animation: sink-flash 450ms ease-out; }
+
+@keyframes ripple {
+  from { transform: scale(0.3); opacity: 1; }
+  to { transform: scale(1.9); opacity: 0; }
+}
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.9); }
+  45% { transform: scale(1.22); }
+  100% { transform: scale(1); box-shadow: 0 0 0 8px rgba(255, 82, 82, 0); }
+}
+@keyframes sink-flash {
+  0% { background: #ffd180; border-color: #fff; }
+  100% { background: var(--sunk); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell.anim-miss::after,
+  .cell.anim-hit,
+  .cell.anim-sunk { animation: none; }
+}
 
 .fleet {
   display: flex;
@@ -121,8 +206,9 @@ button.cell.fired { cursor: not-allowed; }
   padding: 0;
   list-style: none;
   font-size: 0.9rem;
+  color: var(--muted);
 }
-.fleet .sunk { text-decoration: line-through; color: #8a4040; }
+.fleet .sunk { text-decoration: line-through; color: #ff9e9e; }
 
 .legend {
   display: flex;
@@ -133,6 +219,7 @@ button.cell.fired { cursor: not-allowed; }
   padding: 0;
   list-style: none;
   font-size: 0.9rem;
+  color: var(--muted);
 }
 .legend li { display: flex; align-items: center; gap: 6px; }
 .legend .cell { --cell: 24px; }
@@ -140,7 +227,11 @@ button.cell.fired { cursor: not-allowed; }
 /* Phones: stack the boards and put the board you click on first. */
 @media (max-width: 760px) {
   body { padding: 12px; }
-  h1 { font-size: 1.3rem; }
+  h1 { font-size: 1.5rem; }
   .boards { flex-direction: column; align-items: center; }
   #enemy-panel { order: -1; }
+}
+@media (max-width: 380px) {
+  h1 { font-size: 1.2rem; letter-spacing: 0.08em; }
+  #new-game { padding: 8px 12px; }
 }
