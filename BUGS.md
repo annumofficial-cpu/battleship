@@ -15,7 +15,7 @@ I built this with Devin. I asked for a plan first, then the game rules with test
 - What happened: after the computer sank a ship, it went back to random guessing, even if it had also hit a ship next to it.
 - Cause: it cleared its whole list of hits whenever any ship sank.
 - Fix: it now keeps hits on ships still afloat and removes only the sunk ship's squares. The game now also tells it which squares a sunk ship covered, which the player already sees on screen.
-- How I checked it: 5 new tests, including two ships side by side. I also ran the new tests against the old version in a throwaway copy, and three of them failed, which shows they catch the problem. In 5,000 simulated games the computer now sinks a fleet in about 62 shots, down from about 70.
+- How I checked it: 5 new tests, including two ships side by side. I also had Devin run the new tests against the old version in a throwaway copy, and three of them failed, which shows they catch the problem. In 5,000 simulated games the computer now sinks a fleet in about 62 shots, down from about 70.
 - Found by: Devin reported it as a limitation. I asked for the fix.
 
 ## 3. A tapped square stayed dark on a phone
