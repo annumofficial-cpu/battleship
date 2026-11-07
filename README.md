@@ -39,4 +39,6 @@ See [BUGS.md](BUGS.md) for the bugs found while building the game and how each o
 
 ## How this was built with Devin
 
-[To be written by the author]
+I used Devin's web app for everything, and I wrote and edited no code myself. I started by asking for a plan, then approved it with changes: plain HTML, CSS and JavaScript, random ship placement first, and no easy/hard setting yet, so the first version stayed small. I had Devin build and test the game rules before any screen, then the screen, then the computer opponent. After every step I read Devin's summary and checked the result. Devin planted bugs on purpose in its own code to check that its tests would catch them, so I told it to stop doing that inside the repo, and it confirmed the history was clean. I played the live game on my laptop and my iPhone, and that is how I found the third bug. Devin also corrected a number I had put in the bug document and one of its own tests, after checking the evidence.
+
+What surprised me most was how much time it saved. In a large company, getting even a simple game built, tested, debugged and working on laptops and phones would normally take several people days or weeks of back and forth. I did it alone in a matter of hours. I still made the decisions, checked the results and tested on a real phone, but Devin took on the routine work. That frees developers to spend their time on the harder problems that matter most.
