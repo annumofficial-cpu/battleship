@@ -20,7 +20,7 @@ The tests use Node.js's built-in test runner, so there are no extra packages. In
 npm test
 ```
 
-The 62 tests take a couple of seconds and check the game rules and the computer opponent.
+The 62 tests take a couple of seconds and check the game rules, the computer opponent and the end-of-game summary.
 
 ## The files
 
@@ -30,7 +30,7 @@ The 62 tests take a couple of seconds and check the game rules and the computer 
 - `js/ai.js`: the computer opponent. It fires at random until it gets a hit, then aims at the squares next to the hit until that ship sinks. It never fires at the same square twice.
 - `js/stats.js`: counts the end-of-game numbers (shots fired, hits, accuracy and ships still afloat). It has no screen code, so it can be tested on its own.
 - `js/main.js`: connects the rules and the computer to the page: draws the boards, handles clicks and writes the message line.
-- `tests/game.test.js` and `tests/ai.test.js`: the automated tests.
+- `tests/game.test.js`, `tests/ai.test.js` and `tests/stats.test.js`: the automated tests.
 - `package.json`: a small settings file that makes `npm test` run the tests.
 - `BUGS.md`: the bugs found and how they were fixed.
 

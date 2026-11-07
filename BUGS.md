@@ -3,7 +3,7 @@
 Play it: https://annumofficial-cpu.github.io/battleship/
 Code: https://github.com/annumofficial-cpu/battleship
 
-I built this with Devin. I asked for a plan first, then the game rules with tests, then the screen, then the computer opponent. I played the live game on my laptop and my iPhone. 62 automated tests pass. Three real bugs came up.
+I built this with Devin. I asked for a plan first, then the game rules with tests, then the screen, then the computer opponent. I played the live game on my laptop and my iPhone. 62 automated tests pass. Four real bugs came up.
 
 ## 1. Boards stacked on a laptop
 - What happened: on a laptop the two boards sat one above the other instead of side by side.
@@ -23,6 +23,12 @@ I built this with Devin. I asked for a plan first, then the game rules with test
 - Cause: the page darkened any square under the pointer. Phones have no hovering pointer, so the last tapped square stayed "hovered".
 - Fix: the dark colour now applies only on devices with a real mouse, and is off once the game is over.
 - Found by: me, on my phone.
+
+## 4. The end-of-game summary pushed the boards down on a laptop
+- What happened: after I added the end-of-game summary, the bottom row of the boards was off the screen on a laptop until you scrolled.
+- Cause: the summary panel was tall (220 pixels), so it pushed both boards down.
+- Fix: the panel is now one compact line (87 pixels). On a 1366 by 768 screen the boards fit. In a real browser window with tabs and a taskbar the page is only about 650 pixels tall, so you still scroll about 25 pixels at the end of a game. I left that as it is.
+- Found by: Devin flagged it while checking the new screen, and I saw it in the screenshots.
 
 ## What I would do next
 - Let the player place their own ships by clicking, with a rotate button.
