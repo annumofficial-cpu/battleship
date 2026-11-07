@@ -171,31 +171,36 @@ button.cell.fired { cursor: not-allowed; }
 .cell.hit { background: var(--hit); border-color: #ff8a80; color: #fff; }
 .cell.sunk { background: var(--sunk); border-color: #ff6b6b; }
 
-/* End-of-game summary */
+/* End-of-game summary: one compact row, so both boards stay on a laptop screen. */
 .summary {
-  margin: 0 auto 16px;
-  max-width: 520px;
-  padding: 14px 16px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 18px;
+  margin: 0 0 12px;
+  padding: 8px 14px;
   border: 2px solid var(--accent);
   border-radius: 12px;
   background: var(--panel);
-  text-align: center;
   box-shadow: 0 0 18px rgba(79, 216, 232, 0.25);
 }
 .summary[hidden] { display: none; }
-.summary h2 { margin: 0 0 10px; font-size: 1.5rem; color: var(--text); }
+.summary h2 { margin: 0; font-size: 1.3rem; color: var(--text); }
 .summary.lost { border-color: #ff8a80; box-shadow: 0 0 18px rgba(255, 138, 128, 0.2); }
 .summary-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 0 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 16px;
+  margin: 0;
 }
-.summary-stats div { padding: 8px 4px; border-radius: 8px; background: #0a2240; }
+.summary-stats div { display: flex; align-items: baseline; gap: 6px; }
 .summary-stats dt { font-size: 0.85rem; color: var(--muted); }
-.summary-stats dd { margin: 2px 0 0; font-size: 1.6rem; font-weight: 800; }
-.survivors { margin: 0 0 12px; color: var(--muted); }
+.summary-stats dd { margin: 0; font-size: 1.2rem; font-weight: 800; }
+.survivors { margin: 0; color: var(--muted); text-align: center; }
 .survivors span:last-child { color: var(--text); font-weight: 600; }
+#play-again { padding: 8px 16px; }
 
 .hint {
   max-width: 560px;

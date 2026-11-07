@@ -198,14 +198,14 @@ function computerTurn() {
   let text = describeShot('Computer fires', squareName(row, col), shot, 'your');
   if (shot.allSunk) {
     gameOver = true;
-    text += ' All your ships are sunk. You lose. Press New Game to play again.';
+    text += ' All your ships are sunk. You lose. Press Play Again to start a new game.';
   }
   return { text, row, col, shot };
 }
 
 function handleFire(row, col) {
   if (gameOver) {
-    setMessage('The game is over. Press New Game to play again.');
+    setMessage('The game is over. Press Play Again to start a new game.');
     return;
   }
 
@@ -220,7 +220,7 @@ function handleFire(row, col) {
   let reply = null;
   if (shot.allSunk) {
     gameOver = true;
-    text += ' All enemy ships are sunk. You win! Press New Game to play again.';
+    text += ' All enemy ships are sunk. You win! Press Play Again to start a new game.';
   } else {
     reply = computerTurn();
     text += ' ' + reply.text;

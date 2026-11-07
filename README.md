@@ -1,6 +1,6 @@
 # Battleship
 
-A browser game of Battleship you play against the computer. Each side has a 10 by 10 board with five ships: Carrier (5 squares), Battleship (4), Cruiser (3), Submarine (3) and Destroyer (2). Ships are placed at random, and New Game reshuffles them. You fire at the enemy board by clicking or tapping a square, and the computer fires back once after each of your shots. Hits show as ✕ and misses as •, so you don't have to rely on colour. Whoever sinks the other fleet first wins. It works on a laptop or a phone.
+A browser game of Battleship you play against the computer. Each side has a 10 by 10 board with five ships: Carrier (5 squares), Battleship (4), Cruiser (3), Submarine (3) and Destroyer (2). Ships are placed at random, and New Game reshuffles them. You fire at the enemy board by clicking or tapping a square, and the computer fires back once after each of your shots. Hits show as ✕ and misses as •, so you don't have to rely on colour. Whoever sinks the other fleet first wins. It works on a laptop or a phone. When the game ends, a summary shows your shots fired, hits, accuracy and the ships still afloat. You can also play with only a keyboard (arrow keys to move, Enter or Space to fire), and each square has a label for screen readers, though these labels have not been tested with a real screen reader.
 
 **Play it:** https://annumofficial-cpu.github.io/battleship/
 
@@ -20,7 +20,7 @@ The tests use Node.js's built-in test runner, so there are no extra packages. In
 npm test
 ```
 
-The 47 tests take a couple of seconds and check the game rules and the computer opponent.
+The 62 tests take a couple of seconds and check the game rules and the computer opponent.
 
 ## The files
 
@@ -28,6 +28,7 @@ The 47 tests take a couple of seconds and check the game rules and the computer 
 - `css/style.css`: how the page looks, including the phone layout.
 - `js/game.js`: the game rules (board, ships, random placement, firing, sinking). It has no screen code, so it can be tested on its own.
 - `js/ai.js`: the computer opponent. It fires at random until it gets a hit, then aims at the squares next to the hit until that ship sinks. It never fires at the same square twice.
+- `js/stats.js`: counts the end-of-game numbers (shots fired, hits, accuracy and ships still afloat). It has no screen code, so it can be tested on its own.
 - `js/main.js`: connects the rules and the computer to the page: draws the boards, handles clicks and writes the message line.
 - `tests/game.test.js` and `tests/ai.test.js`: the automated tests.
 - `package.json`: a small settings file that makes `npm test` run the tests.

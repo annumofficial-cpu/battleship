@@ -3,7 +3,7 @@
 Play it: https://annumofficial-cpu.github.io/battleship/
 Code: https://github.com/annumofficial-cpu/battleship
 
-I built this with Devin. I asked for a plan first, then the game rules with tests, then the screen, then the computer opponent. I played the live game on my laptop and my iPhone. 47 automated tests pass. Three real bugs came up.
+I built this with Devin. I asked for a plan first, then the game rules with tests, then the screen, then the computer opponent. I played the live game on my laptop and my iPhone. 62 automated tests pass. Three real bugs came up.
 
 ## 1. Boards stacked on a laptop
 - What happened: on a laptop the two boards sat one above the other instead of side by side.
