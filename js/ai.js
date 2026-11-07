@@ -4,7 +4,10 @@
 // Strategy ("hunt and target"):
 //   - Hunt: fire at a random square it has not tried yet.
 //   - Target: after a hit, try the squares directly above, below, left and
-//     right of it, until the game reports that ship as sunk. Then hunt again.
+//     right of it, until the game reports that ship as sunk.
+//   - When a ship sinks, any other hits it has made on ships that are still
+//     afloat are kept, and it carries on aiming around those. Only when no
+//     such hits are left does it go back to hunting.
 // It remembers every square it has picked, so it never fires at one twice.
 import { BOARD_SIZE, RESULT } from './game.js';
 
@@ -16,7 +19,8 @@ export function createAI(random = Math.random, size = BOARD_SIZE) {
     size,
     random,
     tried: Array.from({ length: size }, () => Array(size).fill(false)),
-    targets: [], // squares next to recent hits, waiting to be tried
+    hits: [], // hit squares that belong to ships not yet sunk
+    targets: [], // squares next to those hits, waiting to be tried
   };
 }
 
@@ -50,15 +54,23 @@ export function chooseShot(ai) {
   return square;
 }
 
+function addNeighbours(ai, row, col) {
+  for (const [dr, dc] of NEIGHBOURS) {
+    if (isUntried(ai, row + dr, col + dc)) ai.targets.push([row + dr, col + dc]);
+  }
+}
+
 // Tells the computer what happened to the shot it just fired (the object
 // returned by fireAt in game.js), so it can decide where to aim next.
 export function recordShot(ai, row, col, shot) {
   if (shot.result !== RESULT.HIT) return;
-  if (shot.sunk) {
-    ai.targets = [];
+  ai.hits.push([row, col]);
+  if (!shot.sunk) {
+    addNeighbours(ai, row, col);
     return;
   }
-  for (const [dr, dc] of NEIGHBOURS) {
-    if (isUntried(ai, row + dr, col + dc)) ai.targets.push([row + dr, col + dc]);
-  }
+  const sunk = new Set(shot.sunkCells.map(([r, c]) => `${r},${c}`));
+  ai.hits = ai.hits.filter(([r, c]) => !sunk.has(`${r},${c}`));
+  ai.targets = [];
+  for (const [r, c] of ai.hits) addNeighbours(ai, r, c);
 }

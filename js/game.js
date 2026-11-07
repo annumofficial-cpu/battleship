@@ -118,10 +118,14 @@ export function fireAt(board, row, col) {
 
   const ship = board.ships[index];
   ship.hits += 1;
-  return {
+  const sunk = isSunk(ship);
+  const shot = {
     result: RESULT.HIT,
     ship: ship.name,
-    sunk: isSunk(ship),
+    sunk,
     allSunk: allShipsSunk(board),
   };
+  // Once a ship sinks, its squares are no longer secret (the screen shows them).
+  if (sunk) shot.sunkCells = ship.cells.map(([r, c]) => [r, c]);
+  return shot;
 }

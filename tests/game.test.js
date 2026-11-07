@@ -259,6 +259,16 @@ describe('sinking', () => {
     assert.equal(isSunk(board.ships[0]), true);
   });
 
+  test('a sinking shot reports exactly the squares of the sunk ship', () => {
+    const board = createBoard();
+    placeShip(board, SHIPS[4], 6, 6, false); // Destroyer: 6,6 7,6
+    assert.equal(fireAt(board, 6, 6).sunkCells, undefined, 'squares stay secret until sunk');
+    const last = fireAt(board, 7, 6);
+    assert.deepEqual(last.sunkCells, [[6, 6], [7, 6]]);
+    last.sunkCells[0][0] = 99;
+    assert.deepEqual(board.ships[0].cells[0], [6, 6], 'changing the report must not move the ship');
+  });
+
   test('hitting one ship does not sink a different ship next to it', () => {
     const board = createBoard();
     placeShip(board, SHIPS[4], 0, 0, true); // Destroyer 0,0-0,1

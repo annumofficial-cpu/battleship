@@ -2,7 +2,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { createAI, chooseShot, recordShot } from '../js/ai.js';
-import { RESULT, SHIPS, createBoard, placeShip, placeShipsRandomly, fireAt, allShipsSunk } from '../js/game.js';
+import { RESULT, SHIPS, createBoard, placeShip, placeShipsRandomly, fireAt, allShipsSunk, isSunk } from '../js/game.js';
 
 function seededRandom(seed) {
   let a = seed >>> 0;
@@ -126,6 +126,87 @@ describe('computer: after a hit', () => {
       assert.equal(hits.length, 4);
       assert.deepEqual(ai.targets, [], 'should forget old targets once the ship sinks');
     }
+  });
+});
+
+describe('computer: remembering other hits after a sink', () => {
+  test('two ships side by side: after sinking one, it goes back to the other', () => {
+    const board = createBoard();
+    placeShip(board, SHIPS[4], 4, 3, true); // Destroyer: 4,3 4,4
+    placeShip(board, SHIPS[2], 5, 3, true); // Cruiser right below: 5,3 5,4 5,5
+    const ai = createAI(seededRandom(8));
+    // Shots the computer has already made: Destroyer hit, then the Cruiser
+    // below it hit, then the Destroyer sunk.
+    for (const [r, c] of [[4, 3], [5, 3], [4, 4]]) {
+      ai.tried[r][c] = true;
+      recordShot(ai, r, c, fireAt(board, r, c));
+    }
+    assert.ok(isSunk(board.ships[0]) && !isSunk(board.ships[1]));
+    assert.deepEqual(ai.hits, [[5, 3]], 'should still remember the Cruiser hit');
+
+    const next = chooseShot(ai);
+    assert.ok(['6,3', '5,2', '5,4'].includes(key(next)), `aimed at ${key(next)}, not next to 5,3`);
+    recordShot(ai, next[0], next[1], fireAt(board, next[0], next[1]));
+
+    let shots = 1;
+    while (!isSunk(board.ships[1])) {
+      const { square } = takeTurn(ai, board);
+      assert.ok(ai.tried[square[0]][square[1]]);
+      assert.ok(board.ships[1].cells.concat([[6, 3], [5, 2], [6, 4], [6, 5], [5, 6], [4, 5], [3, 3], [3, 4], [4, 2]])
+        .some((cell) => isNextTo(square, cell) || key(square) === key(cell)), `wandered off to ${key(square)}`);
+      assert.ok(++shots <= 6, 'took too long to finish the Cruiser');
+    }
+    assert.deepEqual(ai.hits, [], 'nothing left to chase');
+    assert.deepEqual(ai.targets, []);
+  });
+
+  test('two ships end to end in the same row: after sinking one, it finishes the other', () => {
+    const board = createBoard();
+    placeShip(board, SHIPS[4], 2, 2, true); // Destroyer: 2,2 2,3
+    placeShip(board, SHIPS[3], 2, 4, true); // Submarine right after it: 2,4 2,5 2,6
+    const ai = createAI(seededRandom(9));
+    // Destroyer hit, Submarine hit, then Destroyer sunk.
+    for (const [r, c] of [[2, 3], [2, 4], [2, 2]]) {
+      ai.tried[r][c] = true;
+      recordShot(ai, r, c, fireAt(board, r, c));
+    }
+    assert.deepEqual(ai.hits, [[2, 4]]);
+    let shots = 0;
+    while (!isSunk(board.ships[1])) {
+      takeTurn(ai, board);
+      assert.ok(++shots <= 6, 'should finish the Submarine without going back to random guessing');
+    }
+  });
+
+  test('a sink with no other hits outstanding goes straight back to random', () => {
+    const ai = createAI(seededRandom(10));
+    ai.tried[1][1] = ai.tried[1][2] = true;
+    recordShot(ai, 1, 1, { result: RESULT.HIT, ship: 'Destroyer', sunk: false });
+    recordShot(ai, 1, 2, { result: RESULT.HIT, ship: 'Destroyer', sunk: true, sunkCells: [[1, 1], [1, 2]] });
+    assert.deepEqual(ai.hits, []);
+    assert.deepEqual(ai.targets, []);
+  });
+
+  test('never goes back to random while a hit ship is still afloat (1,000 games)', () => {
+    let leftoverCases = 0;
+    for (let seed = 0; seed < 1000; seed++) {
+      const board = placeShipsRandomly(seededRandom(seed * 3 + 1));
+      const ai = createAI(seededRandom(seed * 3 + 2));
+      while (!allShipsSunk(board)) {
+        const woundedCells = board.ships
+          .filter((ship) => ship.hits > 0 && !isSunk(ship))
+          .flatMap((ship) => ship.cells.filter(([r, c]) => board.shots[r][c]));
+        const { square, shot } = takeTurn(ai, board);
+        if (woundedCells.length > 0) {
+          assert.ok(
+            woundedCells.some((cell) => isNextTo(square, cell)),
+            `game ${seed}: fired at ${key(square)} while a hit ship was still afloat`
+          );
+        }
+        if (shot.sunk && !shot.allSunk && board.ships.some((s) => s.hits > 0 && !isSunk(s))) leftoverCases++;
+      }
+    }
+    assert.ok(leftoverCases > 50, `only ${leftoverCases} games had hits left over after a sink`);
   });
 });
 
