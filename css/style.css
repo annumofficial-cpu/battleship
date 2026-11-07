@@ -100,7 +100,9 @@ h2 { margin: 0 0 8px; font-size: 1.1rem; text-align: center; }
 }
 
 button.cell { cursor: crosshair; touch-action: manipulation; }
-button.cell:not(.fired):hover { background: var(--water-hover); }
+@media (hover: hover) and (pointer: fine) {
+  .board:not(.game-over) button.cell:not(.fired):hover { background: var(--water-hover); }
+}
 button.cell:focus-visible { outline: 3px solid #f2a900; outline-offset: 1px; }
 button.cell.fired { cursor: not-allowed; }
 .board.game-over button.cell { cursor: default; }
